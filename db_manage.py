@@ -18,7 +18,7 @@ class cxOracle(object):
 
     def _ReConnect(self):
         if not self._conn:
-            self._conn = cx_Oracle.connect(self._uname, self._upwd, self._tns)
+            self._conn = cx_Oracle.connect(self._user, self._pwd, self._tns)
         else:
             pass
 
@@ -40,12 +40,12 @@ class cxOracle(object):
             cur.close()
 
 # 检查是否允许执行的sql语句
-
     def _PermitUpdateSql(self, sql):
         rt = True
         lrsql = sql. lower()
-        sql_elems = [lrsql.strip().split()]
-
+        sql_elems = lrsql.strip().split()
+        print sql_elems[0]
+        print len(sql_elems)
         # update和delete最少有四个单词项
         if len(sql_elems) < 4:
             rt = False
@@ -55,8 +55,6 @@ class cxOracle(object):
                 rt = False
 
         return rt
-
-
 
 # 查询
     def Query(self, sql, nStart = 0, nNum = -1 ):
@@ -70,13 +68,13 @@ class cxOracle(object):
         # 查询到列表
         cur .execute(sql)
         if (nStart == 0) and (nNum == 1):
-            rt .append(cur.fetchone())
+            rt.append(cur.fetchone())
         else:
-            rs = cur. fetchall()
+            rs = cur.fetchall()
             if nNum == -1:
-                rt .extend(rs[nStart:])
+                rt.extend(rs[nStart:])
             else:
-                rt .extend(rs[nStart:nStart + nNum])
+                rt.extend(rs[nStart:nStart + nNum])
 
         # 释放cursor
         self ._DelCursor(cur)
@@ -92,13 +90,14 @@ class cxOracle(object):
             return rt
 
         # 判断sql是否允许其执行
-        if not _PermitUpdateSql(sql):
+
+        if not self._PermitUpdateSql(sql):
             return rt
 
         # 执行语句
         rt = cur. execute(sql)
-
         # 释放cursor
         self ._DelCursor(cur)
-
         return rt
+
+
